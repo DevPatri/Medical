@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:3000") //permiso para poder acceder a la API desde el front en modo desarrollo.
 @RequestMapping("/cita")
 public class CitaController {
 

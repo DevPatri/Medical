@@ -1,8 +1,10 @@
 package com.patricio.citas.service.Impl;
 
 import com.patricio.citas.DTO.DiagnosticoDTO;
+import com.patricio.citas.entity.Cita;
 import com.patricio.citas.entity.Diagnostico;
 import com.patricio.citas.mapper.DiagnosticoMapper;
+import com.patricio.citas.repository.ICitaRepository;
 import com.patricio.citas.repository.IDiagnosticoRepository;
 import com.patricio.citas.service.DiagnosticoServices;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,8 @@ public class DiagnosticoServicesImpl implements DiagnosticoServices {
     IDiagnosticoRepository diagnosticoRepository;
     @Autowired
     DiagnosticoMapper diagnosticoMapper;
+    @Autowired
+    ICitaRepository citaRepository;
 
     @Override
     public List<DiagnosticoDTO> getDiagnosticos() {
@@ -58,11 +62,14 @@ public class DiagnosticoServicesImpl implements DiagnosticoServices {
     public DiagnosticoDTO updateDiagnosticoById(Long id, DiagnosticoDTO request) {
         Optional<Diagnostico> diagnosticoOptional = diagnosticoRepository.findById(id);
 
-        if(diagnosticoOptional.isPresent()){
+        if (diagnosticoOptional.isPresent()) {
             Diagnostico diagnostico = diagnosticoOptional.get();
 
-            if(request.getEnfermedad() != null) diagnostico.setEnfermedad(request.getEnfermedad());
-            if(request.getValoracionEspecialista() != null) diagnostico.setValoracionEspecialista(request.getValoracionEspecialista());
+            if (request.getEnfermedad() != null) diagnostico.setEnfermedad(request.getEnfermedad());
+            if (request.getValoracionEspecialista() != null)
+                diagnostico.setValoracionEspecialista(request.getValoracionEspecialista());
+            Optional<Cita> citaOptional = citaRepository.findById(request.getIdCita());
+            if (citaOptional.isPresent() && request.getIdCita() != null) diagnostico.setCita(citaOptional.get());
 
             diagnostico = diagnosticoRepository.save(diagnostico);
             return diagnosticoMapper.ToDiagnosticoDTO(diagnostico);

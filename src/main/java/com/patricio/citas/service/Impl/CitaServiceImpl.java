@@ -1,6 +1,7 @@
 package com.patricio.citas.service.Impl;
 
 import com.patricio.citas.DTO.CitaDTO;
+import com.patricio.citas.DTO.DiagnosticoDTO;
 import com.patricio.citas.entity.Cita;
 import com.patricio.citas.entity.Diagnostico;
 import com.patricio.citas.entity.Medico;
@@ -12,6 +13,7 @@ import com.patricio.citas.repository.IDiagnosticoRepository;
 import com.patricio.citas.repository.IMedicoRepository;
 import com.patricio.citas.repository.IPacienteRepository;
 import com.patricio.citas.service.CitaServices;
+import com.patricio.citas.service.DiagnosticoServices;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,6 +38,8 @@ public class CitaServiceImpl implements CitaServices {
     IMedicoRepository medicoRepository;
     @Autowired
     IPacienteRepository pacienteRepository;
+    @Autowired
+    DiagnosticoServices diagnosticoServices;
 
     @Transactional
     @Override
@@ -52,8 +56,15 @@ public class CitaServiceImpl implements CitaServices {
     @Transactional
     @Override
     public CitaDTO getCita(Long id) {
-        Optional<Cita> cita = citaRepository.findById(id);
-        return cita.map(value->citaMapper.ToCitaDTO(value)).orElse(null);
+        Optional<Cita> citaOp = citaRepository.findById(id);
+        if(citaOp.isPresent()){
+            Cita cita = citaOp.get();
+            CitaDTO citaDTO = citaMapper.ToCitaDTO(cita);
+            return citaDTO;
+        }else{
+            return null;
+        }
+//        cita.map(value->citaMapper.ToCitaDTO(value)).orElse(null)
     }
 
     @Override
@@ -70,16 +81,19 @@ public class CitaServiceImpl implements CitaServices {
                     .orElseThrow(() -> new EntityNotFoundException("Paciente con NSS no encontrado" + citaDTO.getPacienteNSS()));
             cita.setPaciente(paciente);
         }
+        cita = citaRepository.save(cita);
 
-        Diagnostico diagnostico;
-        if(citaDTO.getDiagnostico() == null){
-            diagnostico = diagnosticoMapper.ToDiagnostico(citaDTO.getDiagnostico());
-        } else {
-            diagnostico = new Diagnostico();
+        if(citaDTO.getDiagnostico() != null){
+            Diagnostico diagnostico = new Diagnostico();
+            diagnostico.setValoracionEspecialista(citaDTO.getDiagnostico().getValoracionEspecialista());
+            diagnostico.setEnfermedad(citaDTO.getDiagnostico().getEnfermedad());
+            diagnostico.setCita(cita);
+            System.out.println(diagnostico);
+            diagnostico = diagnosticoRepository.save(diagnostico);
+            cita.setDiagnostico(diagnostico);
+            citaRepository.save(cita);
         }
-        cita.setDiagnostico(diagnostico);
 
-        citaRepository.save(cita);
         return this.citaMapper.ToCitaDTO(cita);
     }
 
@@ -96,12 +110,25 @@ public class CitaServiceImpl implements CitaServices {
     @Override
     public CitaDTO updateCitaById(Long id, CitaDTO request) {
         Optional<Cita> citaOptional = citaRepository.findById(id);
-        Diagnostico newDiagno = diagnosticoMapper.ToDiagnostico(request.getDiagnostico());
+
+
         if (citaOptional.isPresent()) {
             Cita cita = citaOptional.get();
 
+            if(request.getDiagnostico() != null){
+                Diagnostico newDiagno;
+                if(cita.getDiagnostico() != null) {
+                    newDiagno = cita.getDiagnostico();
+                }else{
+                    newDiagno = new Diagnostico();
+                    newDiagno.setCita(cita);
+                }
+                newDiagno.setValoracionEspecialista(request.getDiagnostico().getValoracionEspecialista());
+                newDiagno.setEnfermedad(request.getDiagnostico().getEnfermedad());
+                cita.setDiagnostico(newDiagno);
+            }
+
             if(request.getMotivoCita() != null) cita.setMotivoCita(request.getMotivoCita());
-            if(request.getDiagnostico() != null) cita.setDiagnostico(newDiagno);
             if(request.getAttribute11() != 0) cita.setAttribute11(request.getAttribute11());
             cita = citaRepository.save(cita);
             return this.citaMapper.ToCitaDTO(cita);

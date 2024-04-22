@@ -1,22 +1,21 @@
 package com.patricio.citas.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
 
 public class Diagnostico {
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String valoracionEspecialista;
     private String enfermedad;
 
-    @OneToOne
-    @JoinColumn(name = "cita_id")
+    @OneToOne(mappedBy = "diagnostico", fetch = FetchType.LAZY)
     private Cita cita;
 
     public Long getId() {
@@ -49,5 +48,15 @@ public class Diagnostico {
 
     public void setCita(Cita cita) {
         this.cita = cita;
+    }
+
+    @Override
+    public String toString() {
+        return "Diagnostico{" +
+                "id=" + id +
+                ", valoracionEspecialista='" + valoracionEspecialista + '\'' +
+                ", enfermedad='" + enfermedad + '\'' +
+                ", cita=" + cita +
+                '}';
     }
 }

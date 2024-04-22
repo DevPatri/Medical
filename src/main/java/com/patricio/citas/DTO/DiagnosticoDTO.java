@@ -43,4 +43,6 @@ public class DiagnosticoDTO {
     public void setIdCita(Long idCita) {
         this.idCita = idCita;
     }
+
+
 }

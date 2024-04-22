@@ -21,4 +21,5 @@ public interface MedicoMapper {
     List<MedicoDTO> toMedicoDTO(List<Medico> medicos);
     List<Medico> toMedicos(List<MedicoDTO> medicoDTOs);
 
+
 }

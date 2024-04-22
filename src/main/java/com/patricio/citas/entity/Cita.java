@@ -2,24 +2,28 @@ package com.patricio.citas.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import java.util.Date;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
 
 public class Cita {
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Date fechaHora;
     private String motivoCita;
     private int attribute11;
 
-    @OneToOne(mappedBy = "cita", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Fetch(FetchMode.JOIN)
+    @JoinColumn(name = "diagnostico_id")
     private Diagnostico diagnostico;
 
     @JsonIgnore
@@ -86,5 +90,9 @@ public class Cita {
 
     public void setPaciente(Paciente paciente) {
         this.paciente = paciente;
+    }
+
+    public String toString() {
+        return "Cita(id=" + this.getId() + ", fechaHora=" + this.getFechaHora() + ", motivoCita=" + this.getMotivoCita() + ", attribute11=" + this.getAttribute11() + ", diagnostico=  Valoración especialista:"+ this.getDiagnostico().getValoracionEspecialista() +"Enfermedad: " + this.getDiagnostico().getEnfermedad() + ", medico=" + this.getMedico() + ", paciente=" + this.getPaciente() + ")";
     }
 }
