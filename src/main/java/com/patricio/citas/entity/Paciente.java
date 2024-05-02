@@ -3,7 +3,11 @@ package com.patricio.citas.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import net.bytebuddy.implementation.bind.annotation.Super;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.Collection;
 import java.util.List;
 
 @Entity
@@ -12,7 +16,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 
 
-public class Paciente extends Usuario{
+public class Paciente extends Usuario implements UserDetails {
 
     @Id
     private String NSS;
@@ -72,5 +76,40 @@ public class Paciente extends Usuario{
 
     public void setMedicos(List<Medico> medicos) {
         this.medicos = medicos;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority("ROLE_PACIENTE"));
+    }
+
+    @Override
+    public String getPassword() {
+        return "";
+    }
+
+    @Override
+    public String getUsername() {
+        return "";
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 }
